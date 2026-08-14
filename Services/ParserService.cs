@@ -29,8 +29,6 @@ public class ParserService : IParserService
 	    
 	    try
 	    {
-	        //using var memoryStream = new MemoryStream(Convert.FromBase64String(request.Content));
-	        //decodedString = Encoding.UTF8.GetString(memoryStream);
 	        content = Convert.FromBase64String(request.Content);
     		using var memoryStream = new MemoryStream(content);
     		using var reader = new StreamReader(memoryStream, Encoding.UTF8);
@@ -77,9 +75,4 @@ public class ParserService : IParserService
 		var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 		return csv.GetRecords<object>().ToList();
 	}
-	
-	//private List<Dictionary<string, object>> ParseCsv(string decodedString)
-	//{
-		//return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(decodedString)
-	//}
 }

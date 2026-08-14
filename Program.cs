@@ -36,8 +36,3 @@ app.MapPost("/api/v1/parse-content", (ParseRequest request, IParserService parse
 .Accepts<ParseRequest>("application/json");
 
 app.Run();
-
-//public class ParsedRecord
-//{
-//    public Dictionary<string, string> Fields { get; set; }
-//}
