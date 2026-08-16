@@ -1,7 +1,5 @@
-using CsvHelper;
-using System.Globalization;
+
 using System.Text;
-using System.Text.Json;
 
 using Parser.Models;
 
@@ -16,63 +14,55 @@ public class ParserService : IParserService
 		_maxContentSize = configuration.GetValue<int>("Parser:MaxContentSizeMB", 10) * 1024 * 1024;
 	}
 	
-	public ParseResult Parse(ParseRequest request) 
+	public ParseResult<List<object>> Parse(ParseRequest request) 
 	{
 		if (request.Content.Length > _maxContentSize)
-			return ParseResult.Fail($"Content exceeds {_maxContentSize / 1024 / 1024} MB limit");
+			return ParseResult<List<object>>.Fail($"Content exceeds {_maxContentSize / 1024 / 1024} MB limit");
 			
 		if (!Enum.IsDefined(request.Type))
-        	return ParseResult.Fail("Invalid type. Allowed: CSV, INTERNAL_JSON");
+        	return ParseResult<List<object>>.Fail("Invalid type. Allowed: CSV, INTERNAL_JSON");
 			
-	    byte[] content;
-	    string decodedString;
+	    var decodeResult = ConvertFromBase64(request.Content);
 	    
-	    try
+	    if (!decodeResult.Success)
+	    	ParseResult<List<object>>.Fail(decodeResult.Error);
+	    	
+	    string decodedString = decodeResult.Data;
+	    	
+		var parserHandler = GetParserHandler(request.Type);
+		var parseResult = parserHandler.Handle(decodedString);
+		if (!parseResult.Success)
+	    	return ParseResult<List<object>>.Fail(parseResult.Error);
+
+	    return ParseResult<List<object>>.Ok(parseResult.Data);
+	}
+	
+	private ParseResult<string> ConvertFromBase64(string content)
+	{
+		try
 	    {
-	        content = Convert.FromBase64String(request.Content);
-    		using var memoryStream = new MemoryStream(content);
+	        byte[] c = Convert.FromBase64String(content);
+    		using var memoryStream = new MemoryStream(c);
     		using var reader = new StreamReader(memoryStream, Encoding.UTF8);
-    		decodedString = reader.ReadToEnd();
+    		
+    		return ParseResult<string>.Ok(reader.ReadToEnd());
 	    }
 	    catch (FormatException)
 	    {
-	        return ParseResult.Fail("Content is not valid Base64");
+	    	return ParseResult<string>.Fail("Content is not valid Base64");
 	    }
 	    catch
         {
-            return ParseResult.Fail("Failed to decode content");
+        	return ParseResult<string>.Fail("Failed to decode content");
         }
-	    
-	    var records = new List<object>();
-	    
-	    try
-	    {   
-	    	records = request.Type switch
-			{
-			    ContentType.CSV => ParseCsv(decodedString),
-			    ContentType.INTERNAL_JSON => JsonSerializer.Deserialize<List<object>>(decodedString),
-			};
-	    }
-	    catch (JsonException)
-	    {
-	        return ParseResult.Fail("Invalid JSON content");
-	    }
-	    catch (CsvHelperException ex)
-	    {
-	        return ParseResult.Fail($"Invalid CSV content. {ex.Message}");
-	    }
-	    catch (Exception ex)
-	    {
-	        return ParseResult.Fail($"Parsing error: {ex.Message}");
-	    }
-	
-	    return ParseResult.Ok(records);
 	}
 	
-	private List<object> ParseCsv(string decodedString)
+	private IParserHandler GetParserHandler(ContentType type)
 	{
-		using var reader = new StringReader(decodedString);
-		var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-		return csv.GetRecords<object>().ToList();
+	    return type switch
+	    {
+	        ContentType.CSV => new ParserHandlerCSV(),
+	        ContentType.INTERNAL_JSON => new ParserHandlerInternalJSON()
+	    };
 	}
 }
