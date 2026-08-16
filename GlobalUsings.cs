@@ -1,0 +1,1 @@
+global using ServiceParseResult = Parser.Services.ParseResult<System.Collections.Generic.List<object>>;

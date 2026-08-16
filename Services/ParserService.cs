@@ -14,27 +14,27 @@ public class ParserService : IParserService
 		_maxContentSize = configuration.GetValue<int>("Parser:MaxContentSizeMB", 10) * 1024 * 1024;
 	}
 	
-	public ParseResult<List<object>> Parse(ParseRequest request) 
+	public ServiceParseResult Parse(ParseRequest request) 
 	{
 		if (request.Content.Length > _maxContentSize)
-			return ParseResult<List<object>>.Fail($"Content exceeds {_maxContentSize / 1024 / 1024} MB limit");
+			return ServiceParseResult.Fail($"Content exceeds {_maxContentSize / 1024 / 1024} MB limit");
 			
 		if (!Enum.IsDefined(request.Type))
-        	return ParseResult<List<object>>.Fail("Invalid type. Allowed: CSV, INTERNAL_JSON");
+        	return ServiceParseResult.Fail("Invalid type. Allowed: CSV, INTERNAL_JSON");
 			
 	    var decodeResult = ConvertFromBase64(request.Content);
 	    
 	    if (!decodeResult.Success)
-	    	ParseResult<List<object>>.Fail(decodeResult.Error);
+	    	ServiceParseResult.Fail(decodeResult.Error);
 	    	
 	    string decodedString = decodeResult.Data;
 	    	
 		var parserHandler = GetParserHandler(request.Type);
 		var parseResult = parserHandler.Handle(decodedString);
 		if (!parseResult.Success)
-	    	return ParseResult<List<object>>.Fail(parseResult.Error);
+	    	return ServiceParseResult.Fail(parseResult.Error);
 
-	    return ParseResult<List<object>>.Ok(parseResult.Data);
+	    return ServiceParseResult.Ok(parseResult.Data);
 	}
 	
 	private ParseResult<string> ConvertFromBase64(string content)
