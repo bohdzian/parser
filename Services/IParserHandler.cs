@@ -2,5 +2,5 @@ namespace Parser.Services;
 
 public interface IParserHandler
 {
-	public ParseResult<List<object>> Handle(string decodedString);
+	public ServiceParseResult Handle(string decodedString);
 }
