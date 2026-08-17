@@ -21,7 +21,7 @@ app.UseHttpsRedirection();
 app.MapPost("/api/v1/parse-content", (ParseRequest request, IParserService parser) =>
 {  
     var result = parser.Parse(request);
-    
+
     return result.Success
         ? Results.Ok(new { count = result.Value.Count, records = result.Value })
         : Results.Problem(title: "Invalid request", detail: result.Error.Description, statusCode: 400);

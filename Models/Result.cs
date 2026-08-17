@@ -5,9 +5,9 @@ public record Result
     public bool Success { get; }
     public Error? Error { get; }
     
-    protected Result(bool Success, Error? error)
+    protected Result(bool success, Error? error)
     {
-        Success = Success;
+        Success = success;
         Error = error;
     }
 
@@ -21,8 +21,8 @@ public record Result<T> : Result
 {
     public T? Value { get; }
     
-    private Result(T value) : base(true, null) => Value = value;
-    private Result(Error error) : base(false, error) { }
+    public Result(T value) : base(true, null) => Value = value;
+    public Result(Error error) : base(false, error) { }
 
     public static implicit operator Result<T>(T value) => new(value);
 

@@ -14,7 +14,7 @@ public class ParserService : IParserService
 	}
 	
 	public Result<List<object>> Parse(ParseRequest request)
-	{
+	{	
 		if (request.Content.Length > _maxContentSize)
 			return Errors.PayloadTooLarge;
 			
@@ -22,7 +22,7 @@ public class ParserService : IParserService
         	return Errors.ContentTypeNotAllowed;
 			
 	    var decodeResult = ConvertFromBase64(request.Content);
-	    
+
 	    if (!decodeResult.Success)
 	    	return decodeResult.Error;
 	    	
@@ -30,7 +30,7 @@ public class ParserService : IParserService
 	    	
 		var parserHandler = GetParserHandler(request.Type);
 		var parseResult = parserHandler.Handle(decodedString);
-		
+
 		if (!parseResult.Success)
 	    	return parseResult.Error;
 
@@ -44,8 +44,8 @@ public class ParserService : IParserService
 	        byte[] c = Convert.FromBase64String(content);
     		using var memoryStream = new MemoryStream(c);
     		using var reader = new StreamReader(memoryStream, Encoding.UTF8);
-    		
-    		return reader.ReadToEnd();
+    		var r = reader.ReadToEnd();
+    		return new Result<string>(r);
 	    }
 	    catch (FormatException)
 	    {
