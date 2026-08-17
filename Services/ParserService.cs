@@ -44,7 +44,7 @@ public class ParserService : IParserService
 	        byte[] c = Convert.FromBase64String(content);
     		using var memoryStream = new MemoryStream(c);
     		using var reader = new StreamReader(memoryStream, Encoding.UTF8);
-    		return new Result<string>(reader.ReadToEnd());
+    		return reader.ReadToEnd();
 	    }
 	    catch (FormatException)
 	    {
