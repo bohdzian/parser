@@ -21,7 +21,7 @@ public class ParserService : IParserService
 		if (!Enum.IsDefined(request.Type))
         	return Errors.ContentTypeNotAllowed;
 			
-	    var decodeResult = ConvertFromBase64(request.Content);
+	    var decodeResult = DecodeFromBase64(request.Content);
 
 	    if (!decodeResult.Success)
 	    	return decodeResult.Error;
@@ -37,7 +37,7 @@ public class ParserService : IParserService
 	    return parseResult.Value;
 	}
 	
-	private Result<string> ConvertFromBase64(string content)
+	private Result<string> DecodeFromBase64(string content)
 	{
 		try
 	    {
