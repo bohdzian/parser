@@ -4,5 +4,5 @@ namespace Parser.Services;
 
 public interface IParserService
 {
-	public ServiceParseResult Parse(ParseRequest request);
+	public Result<List<object>> Parse(ParseRequest request);
 }

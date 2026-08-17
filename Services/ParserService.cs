@@ -1,4 +1,3 @@
-
 using System.Text;
 
 using Parser.Models;
@@ -14,30 +13,30 @@ public class ParserService : IParserService
 		_maxContentSize = configuration.GetValue<int>("Parser:MaxContentSizeMB", 10) * 1024 * 1024;
 	}
 	
-	public ServiceParseResult Parse(ParseRequest request) 
+	public Result<List<object>> Parse(ParseRequest request) 
 	{
 		if (request.Content.Length > _maxContentSize)
-			return ServiceParseResult.Fail($"Content exceeds {_maxContentSize / 1024 / 1024} MB limit");
+			return Errors.PayloadTooLarge;
 			
 		if (!Enum.IsDefined(request.Type))
-        	return ServiceParseResult.Fail("Invalid type. Allowed: CSV, INTERNAL_JSON");
+        	return Errors.ContentTypeNotAllowed;
 			
 	    var decodeResult = ConvertFromBase64(request.Content);
 	    
 	    if (!decodeResult.Success)
-	    	ServiceParseResult.Fail(decodeResult.Error);
+	    	return Errors.DecodingFailed;
 	    	
-	    string decodedString = decodeResult.Data;
+	    string decodedString = decodeResult.Value;
 	    	
 		var parserHandler = GetParserHandler(request.Type);
 		var parseResult = parserHandler.Handle(decodedString);
 		if (!parseResult.Success)
-	    	return ServiceParseResult.Fail(parseResult.Error);
+	    	return parseResult.Error;
 
-	    return ServiceParseResult.Ok(parseResult.Data);
+	    return parseResult.Value;
 	}
 	
-	private ParseResult<string> ConvertFromBase64(string content)
+	private Result<string> ConvertFromBase64(string content)
 	{
 		try
 	    {
@@ -45,15 +44,15 @@ public class ParserService : IParserService
     		using var memoryStream = new MemoryStream(c);
     		using var reader = new StreamReader(memoryStream, Encoding.UTF8);
     		
-    		return ParseResult<string>.Ok(reader.ReadToEnd());
+    		return reader.ReadToEnd();
 	    }
 	    catch (FormatException)
 	    {
-	    	return ParseResult<string>.Fail("Content is not valid Base64");
+	    	return Errors.InvalidBase64;
 	    }
 	    catch
         {
-        	return ParseResult<string>.Fail("Failed to decode content");
+        	return Errors.DecodingFailed;
         }
 	}
 	

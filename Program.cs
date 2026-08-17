@@ -23,8 +23,8 @@ app.MapPost("/api/v1/parse-content", (ParseRequest request, IParserService parse
     var result = parser.Parse(request);
     
     return result.Success
-        ? Results.Ok(new { count = result.Data.Count, records = result.Data })
-        : Results.Problem(title: "Invalid request", detail: result.Error, statusCode: 400);
+        ? Results.Ok(new { count = result.Value.Count, records = result.Value })
+        : Results.Problem(title: "Invalid request", detail: result.Error.Description, statusCode: 400);
 })
 .Accepts<ParseRequest>("application/json");
 
