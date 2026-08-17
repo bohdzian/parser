@@ -13,7 +13,7 @@ public class ParserService : IParserService
 		_maxContentSize = configuration.GetValue<int>("Parser:MaxContentSizeMB", 10) * 1024 * 1024;
 	}
 	
-	public Result<List<object>> Parse(ParseRequest request) 
+	public Result<List<object>> Parse(ParseRequest request)
 	{
 		if (request.Content.Length > _maxContentSize)
 			return Errors.PayloadTooLarge;
@@ -24,12 +24,13 @@ public class ParserService : IParserService
 	    var decodeResult = ConvertFromBase64(request.Content);
 	    
 	    if (!decodeResult.Success)
-	    	return Errors.DecodingFailed;
+	    	return decodeResult.Error;
 	    	
 	    string decodedString = decodeResult.Value;
 	    	
 		var parserHandler = GetParserHandler(request.Type);
 		var parseResult = parserHandler.Handle(decodedString);
+		
 		if (!parseResult.Success)
 	    	return parseResult.Error;
 
