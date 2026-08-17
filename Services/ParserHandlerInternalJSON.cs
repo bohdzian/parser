@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Parser.Services;
 
@@ -8,7 +9,15 @@ public class ParserHandlerInternalJSON : IParserHandler
 	{
 		try
 	    {
-			return JsonSerializer.Deserialize<List<object>>(decodedString);
+	    	var node = JsonNode.Parse(decodedString);
+
+            var array = node switch
+            {
+                JsonArray arr => arr,
+                JsonObject obj => new JsonArray(obj.DeepClone())
+            };
+
+			return array.Deserialize<List<object>>();
 		}
 		catch (JsonException)
 	    {
