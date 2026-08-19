@@ -29,3 +29,6 @@ app.MapPost("/api/v1/parse-content", (ParseRequest request, IParserService parse
 .Accepts<ParseRequest>("application/json");
 
 app.Run();
+
+// expose the Program class for testing
+public partial class Program { }

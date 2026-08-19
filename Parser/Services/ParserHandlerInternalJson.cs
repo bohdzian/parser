@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 
 namespace Parser.Services;
 
-public class ParserHandlerInternalJSON : IParserHandler
+public class ParserHandlerInternalJson : IParserHandler
 {
 	public Result<List<object>> Handle(string decodedString)
 	{
@@ -21,7 +21,7 @@ public class ParserHandlerInternalJSON : IParserHandler
 		}
 		catch (JsonException)
 	    {
-	        return Errors.InvalidJSON;
+	        return Errors.InvalidJson;
 	    }
 	}
 }

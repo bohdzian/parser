@@ -61,7 +61,7 @@ public class ParserService : IParserService
 	    return type switch
 	    {
 	        ContentType.CSV => new ParserHandlerCSV(),
-	        ContentType.INTERNAL_JSON => new ParserHandlerInternalJSON()
+	        ContentType.INTERNAL_JSON => new ParserHandlerInternalJson()
 	    };
 	}
 }
