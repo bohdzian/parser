@@ -1,7 +1,7 @@
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
-using NUnit.Framework;
 using RestSharp;
 
 namespace Parser.Tests;
@@ -48,9 +48,11 @@ public class ParserApiTests
         });
 
         RestResponse response = await _restClient.ExecuteAsync(request);
+        var jsonResponse = JsonSerializer.Deserialize<JsonElement>(response.Content);
+        var detail = jsonResponse.GetProperty("detail").GetString();
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        Assert.That(response.Content, Does.Contain("Invalid Base64 content."));
+        Assert.That(detail, Is.EqualTo("Invalid Base64 content."));
     }
 
     [OneTimeTearDown]
